@@ -1,0 +1,52 @@
+pragma solidity ^0.8.0;
+
+contract Voting {
+    address public owner;
+    bool public votingEnded;
+    mapping(address => bool) public hasVoted;
+    uint public totalVotes;
+
+    constructor() {
+        owner = msg.sender;
+        votingEnded = false;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only the owner can perform this action");
+        _;
+    }
+
+    modifier votingNotEnded() {
+        require(!votingEnded, "Voting has ended");
+        _;
+    }
+
+    function vote() public votingNotEnded {
+        require(!hasVoted[msg.sender], "You have already voted");
+
+        hasVoted[msg.sender] = true;
+        totalVotes += 1;
+
+        assert(hasVoted[msg.sender] == true); // Ensure the vote was registered
+    }
+
+    function endVoting() public onlyOwner {
+        votingEnded = true;
+
+        // Ensure that voting has ended
+        assert(votingEnded == true);
+    }
+
+    function resetVoting() public onlyOwner {
+        // Check if the voting is not already in progress
+        if (!votingEnded) {
+            revert("Voting is still in progress, cannot reset");
+        }
+
+        votingEnded = false;
+        totalVotes = 0;
+        
+        // Reset voting status for all voters (in a real scenario, we would need to reset all mappings)
+        // For simplicity, not doing this here as it would require more complex data structures
+    }
+}
